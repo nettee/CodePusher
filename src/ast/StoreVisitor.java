@@ -113,6 +113,17 @@ import graph.RelName;
  * <code>Graph.addRelationships()</code> should be invoked in
  * <code>endVisit</code> (but not in <code>visit</code>), because a relationship
  * can only be created when both nodes are created.
+ * <p>
+ * Modifications on Syntax Tree:
+ * <ol>
+ * <li>discard all comments, delete <code>LineComment</code>,
+ * <code>BlockComment</code>, <code>Javadoc</code>, <code>TagElement</code>,
+ * <code>TextElement</code> nodes
+ * <li>delete <code>Modifier</code> nodes, add <em>MODIFIERS</em> property to
+ * <code>TypeDeclaration</code>, <code>FieldDeclaration</code>,
+ * <code>MethodDeclaration</code>, <code>SingleVariableDeclaration</code> node,
+ * which is of <code>int</code> type
+ * </ol>
  * 
  * @see Graph
  *
