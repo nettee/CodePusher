@@ -14,15 +14,15 @@ public class StoreWorker implements Worker {
 
 	@Override
 	public void work(GraphDatabaseService db) {
-		
+
 		Graph graph = new Graph(db);
-		
+
 		ASTCreator creator = new ASTCreator(Option.PROJECT_DIR);
 		while (creator.hasNext()) {
 			Tree tree = creator.next();
 			graph.storeTree(tree);
 		}
-		
+
 		graph.connectTrees();
 
 		logger.info("Work finished");

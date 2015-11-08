@@ -105,8 +105,7 @@ import graph.RelName;
  * Working pattern and procedure:
  * <ol>
  * <li>create nodes in <code>preVisit()</code>
- * <li>set property for graph in <code>visit(graph)</code>
- * <li>add relationship between nodes in <code>endVisit(graph)</code>
+ * <li>set properties and add relationships in <code>endVisit(graph)</code>
  * </ol>
  * <p>
  * Note that <code>Graph.addRelationship()</code> and
@@ -123,6 +122,8 @@ import graph.RelName;
  * <code>TypeDeclaration</code>, <code>FieldDeclaration</code>,
  * <code>MethodDeclaration</code>, <code>SingleVariableDeclaration</code> node,
  * which is of <code>int</code> type
+ * <li>add <em>NAME</em> property for <code>TypeDeclaration</code> node, and 
+ * delete its <em>NAME</em> child
  * </ol>
  * 
  * @see Graph
@@ -604,11 +605,13 @@ public class StoreVisitor extends ASTVisitor {
 	@Override
 	public void endVisit(TypeDeclaration node) {
 		graph.setProperty(node, "INTERFACE", node.isInterface());
+		
+		graph.setProperty(node, "NAME", node.getName().getIdentifier());
+		graph.deleteNode(node.getName());
 
 		graph.setProperty(node, "MODIFIERS", node.getModifiers());
 		graph.deleteNodes(node.modifiers());
 
-		graph.addRelationship(node, node.getName(), RelName.NAME);
 		graph.addRelationships(node, node.typeParameters(), RelName.TYPE_PARAMETERS);
 		graph.addRelationship(node, node.getSuperclassType(), RelName.SUPERCLASS_TYPE);
 		graph.addRelationships(node, node.superInterfaceTypes(), RelName.SUPER_INTERFACE_TYPES);
