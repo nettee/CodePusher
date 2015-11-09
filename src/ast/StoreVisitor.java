@@ -122,8 +122,11 @@ import graph.RelName;
  * <code>TypeDeclaration</code>, <code>FieldDeclaration</code>,
  * <code>MethodDeclaration</code>, <code>SingleVariableDeclaration</code> node,
  * which is of <code>int</code> type
- * <li>add <em>NAME</em> property for <code>TypeDeclaration</code> node, and 
+ * <li>add <em>NAME</em> property for <code>PackageDeclaration</code>,
+ * <code>TypeDeclaration</code> and <code>MethodDeclaration</code> node, and
  * delete its <em>NAME</em> child
+ * <li>delete <em>QUALIFIER</em> and <em>NAME</em> child of
+ * <code>QualifiedName</code> node
  * </ol>
  * 
  * @see Graph
@@ -316,7 +319,6 @@ public class StoreVisitor extends ASTVisitor {
 	@Override
 	public void endVisit(FieldDeclaration node) {
 		graph.setProperty(node, "MODIFIERS", node.getModifiers());
-		graph.deleteNodes(node.modifiers());
 
 		graph.addRelationship(node, node.getType(), RelName.TYPE);
 		graph.addRelationships(node, node.fragments(), RelName.FRAGMENTS);
@@ -405,13 +407,13 @@ public class StoreVisitor extends ASTVisitor {
 	@Override
 	public void endVisit(MethodDeclaration node) {
 		graph.setProperty(node, "CONSTRUCTOR", node.isConstructor());
-
 		graph.setProperty(node, "MODIFIERS", node.getModifiers());
-		graph.deleteNodes(node.modifiers());
+
+		graph.setProperty(node, "NAME", node.getName().getIdentifier());
+		graph.deleteNode(node.getName());
 
 		graph.addRelationships(node, node.typeParameters(), RelName.TYPE_PARAMETERS);
 		graph.addRelationship(node, node.getReturnType2(), RelName.RETURN_TYPE);
-		graph.addRelationship(node, node.getName(), RelName.NAME);
 		graph.addRelationships(node, node.parameters(), RelName.PARAMETERS);
 		graph.addRelationship(node, node.getBody(), RelName.BODY);
 	}
@@ -436,7 +438,7 @@ public class StoreVisitor extends ASTVisitor {
 
 	@Override
 	public void endVisit(Modifier node) {
-
+		graph.deleteNode(node);
 	}
 
 	@Override
@@ -461,8 +463,10 @@ public class StoreVisitor extends ASTVisitor {
 
 	@Override
 	public void endVisit(PackageDeclaration node) {
+		graph.setProperty(node, "NAME", node.getName().getFullyQualifiedName());
+		graph.deleteNode(node.getName());
+
 		graph.addRelationships(node, node.annotations(), RelName.ANNOTATIONS);
-		graph.addRelationship(node, node.getName(), RelName.NAME);
 	}
 
 	@Override
@@ -494,15 +498,14 @@ public class StoreVisitor extends ASTVisitor {
 
 	@Override
 	public void endVisit(QualifiedName node) {
-		graph.addRelationship(node, node.getQualifier(), RelName.QUALIFIER);
-		graph.addRelationship(node, node.getName(), RelName.NAME);
+		graph.deleteNode(node.getQualifier());
+		graph.deleteNode(node.getName());
 	}
 
 	@Override
 	public void endVisit(QualifiedType node) {
 		graph.addRelationship(node, node.getQualifier(), RelName.QUALIFIER);
 		graph.addRelationship(node, node.getName(), RelName.NAME);
-
 	}
 
 	@Override
@@ -528,9 +531,7 @@ public class StoreVisitor extends ASTVisitor {
 	@Override
 	public void endVisit(SingleVariableDeclaration node) {
 		graph.setProperty(node, "VARARGS", node.isVarargs());
-
 		graph.setProperty(node, "MODIFIERS", node.getModifiers());
-		graph.deleteNodes(node.modifiers());
 
 		graph.addRelationship(node, node.getType(), RelName.TYPE);
 		graph.addRelationship(node, node.getName(), RelName.NAME);
@@ -605,12 +606,10 @@ public class StoreVisitor extends ASTVisitor {
 	@Override
 	public void endVisit(TypeDeclaration node) {
 		graph.setProperty(node, "INTERFACE", node.isInterface());
-		
+		graph.setProperty(node, "MODIFIERS", node.getModifiers());
+
 		graph.setProperty(node, "NAME", node.getName().getIdentifier());
 		graph.deleteNode(node.getName());
-
-		graph.setProperty(node, "MODIFIERS", node.getModifiers());
-		graph.deleteNodes(node.modifiers());
 
 		graph.addRelationships(node, node.typeParameters(), RelName.TYPE_PARAMETERS);
 		graph.addRelationship(node, node.getSuperclassType(), RelName.SUPERCLASS_TYPE);

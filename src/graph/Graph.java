@@ -52,7 +52,7 @@ public class Graph {
 	public void storeTree(Tree tree) {
 		StoreVisitor visitor = new StoreVisitor(this);
 		tree.root.accept(visitor);
-		
+
 		Node rootNode = map.get(tree.root);
 		rootNode.setProperty("FILENAME", tree.filename);
 		treeRoots.add(rootNode);
@@ -75,7 +75,7 @@ public class Graph {
 	public Node createNode(ASTNode astNode) {
 
 		Node node = db.createNode();
-
+		
 		// add raw label
 		String name = astNode.getClass().getSimpleName();
 		node.addLabel(DynamicLabel.label(name));
@@ -105,12 +105,32 @@ public class Graph {
 
 		return node;
 	}
-	
+
+	/**
+	 * Deletes the node corresponding to this AST node.
+	 * <p>
+	 * NOTE: <code>deleteNode()</code> must be invoked on a node with no
+	 * relationships, otherwise, an unchecked exception will be raised when the
+	 * transaction is committing.
+	 * 
+	 * @param astNode
+	 *            the AST node
+	 */
 	public void deleteNode(ASTNode astNode) {
 		Node node = map.get(astNode);
 		node.delete();
 	}
-	
+
+	/**
+	 * Deletes all the nodes corresponding to the AST nodes in list
+	 * <p>
+	 * NOTE: <code>deleteNodes()</code> must be invoked on nodes with no
+	 * relationships, otherwise, an unchecked exception will be raised when the
+	 * transaction is committing.
+	 * 
+	 * @param astNodes
+	 *            the list of AST nodes
+	 */
 	@SuppressWarnings("rawtypes")
 	public void deleteNodes(List astNodes) {
 		for (Object obj : astNodes) {
