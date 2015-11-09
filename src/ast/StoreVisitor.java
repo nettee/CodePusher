@@ -35,6 +35,7 @@ import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.InfixExpression;
@@ -127,6 +128,8 @@ import graph.RelName;
  * delete its <em>NAME</em> child
  * <li>delete <em>QUALIFIER</em> and <em>NAME</em> child of
  * <code>QualifiedName</code> node
+ * <li>add <em>NAME</em> and <em>QUALIFIED_NAME</em> property for
+ * <code>SimpleType</code> node, and delete its <em>NAME</em> child
  * </ol>
  * 
  * @see Graph
@@ -520,7 +523,10 @@ public class StoreVisitor extends ASTVisitor {
 
 	@Override
 	public void endVisit(SimpleType node) {
-		graph.addRelationship(node, node.getName(), RelName.NAME);
+		ITypeBinding binding = node.resolveBinding();
+		graph.setProperty(node, "NAME", binding.getName());
+		graph.setProperty(node, "QUALIFIED_NAME", binding.getQualifiedName());
+		graph.deleteNode(node.getName());
 	}
 
 	@Override
