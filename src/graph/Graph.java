@@ -13,9 +13,12 @@ import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.neo4j.graphdb.DynamicLabel;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -75,7 +78,7 @@ public class Graph {
 	public Node createNode(ASTNode astNode) {
 
 		Node node = db.createNode();
-		
+
 		// add raw label
 		String name = astNode.getClass().getSimpleName();
 		node.addLabel(DynamicLabel.label(name));
@@ -83,25 +86,72 @@ public class Graph {
 		// add general label
 		if (astNode instanceof BodyDeclaration) {
 			node.addLabel(NodeLabel.BodyDeclaration);
-		} else if (astNode instanceof AbstractTypeDeclaration) {
+		}
+		if (astNode instanceof AbstractTypeDeclaration) {
 			node.addLabel(NodeLabel.AbstractTypeDeclaration);
-		} else if (astNode instanceof Comment) {
+		}
+		if (astNode instanceof Comment) {
 			node.addLabel(NodeLabel.Comment);
-		} else if (astNode instanceof Expression) {
+		}
+		if (astNode instanceof Expression) {
 			node.addLabel(NodeLabel.Expression);
-		} else if (astNode instanceof Annotation) {
+		}
+		if (astNode instanceof Annotation) {
 			node.addLabel(NodeLabel.Annatation);
-		} else if (astNode instanceof Name) {
+		}
+		if (astNode instanceof Name) {
 			node.addLabel(NodeLabel.Name);
-		} else if (astNode instanceof Statement) {
+		}
+		if (astNode instanceof Statement) {
 			node.addLabel(NodeLabel.Statement);
-		} else if (astNode instanceof Type) {
+		}
+		if (astNode instanceof Type) {
 			node.addLabel(NodeLabel.Type);
-		} else if (astNode instanceof VariableDeclaration) {
+		}
+		if (astNode instanceof VariableDeclaration) {
 			node.addLabel(NodeLabel.VariableDeclaration);
 		}
 
+		// add type binding
+		if (astNode instanceof TypeDeclaration) {
+			createBindingNode(node, ((TypeDeclaration) astNode).resolveBinding());
+		}
+
+		// add method binding
+		if (astNode instanceof MethodDeclaration) {
+			createBindingNode(node, ((MethodDeclaration) astNode).resolveBinding());
+		}
+
 		map.put(astNode, node);
+
+		return node;
+	}
+
+	private Node createBindingNode(Node node0, IBinding binding) {
+		if (node0 == null) {
+			throw new IllegalArgumentException();
+		}
+
+		Node node = db.createNode();
+		node.addLabel(NodeLabel.Binding);
+
+		switch (binding.getKind()) {
+		case IBinding.TYPE:
+			node.addLabel(NodeLabel.TypeBinding);
+			break;
+		case IBinding.METHOD:
+			node.addLabel(NodeLabel.MethodBinding);
+			break;
+		case IBinding.VARIABLE:
+			node.addLabel(NodeLabel.VariableBinding);
+			break;
+		default:
+			throw new AssertionError();
+		}
+
+		node.setProperty("KEY", binding.getKey());
+		node.setProperty("NAME", binding.getName());
+		node0.createRelationshipTo(node, RelType.BINDING);
 
 		return node;
 	}

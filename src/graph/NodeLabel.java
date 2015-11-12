@@ -4,11 +4,11 @@ import org.neo4j.graphdb.Label;
 
 public enum NodeLabel implements Label {
 	
-	// key labels
-	Key,
-	TypeKey,
-	MethodKey,
-	VariableKey,
+	// binding labels
+	Binding,
+	TypeBinding,
+	MethodBinding,
+	VariableBinding,
 	
 	// general labels
 	BodyDeclaration,

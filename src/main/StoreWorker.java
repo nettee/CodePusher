@@ -11,7 +11,7 @@ import neo4j.Worker;
 public class StoreWorker implements Worker {
 
 	private static Logger logger = Logger.getLogger(StoreWorker.class);
-
+	
 	@Override
 	public void work(GraphDatabaseService db) {
 

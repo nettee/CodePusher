@@ -5,6 +5,6 @@ import org.neo4j.graphdb.RelationshipType;
 public enum RelType implements RelationshipType {
 	AST,
 	CONN,
-	KEY,
+	BINDING,
 	UML,
 }
