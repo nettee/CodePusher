@@ -1,5 +1,7 @@
 package ast;
 
+import java.util.List;
+
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
@@ -119,10 +121,10 @@ import graph.RelName;
  * <li>discard all comments, delete <code>LineComment</code>,
  * <code>BlockComment</code>, <code>Javadoc</code>, <code>TagElement</code>,
  * <code>TextElement</code> nodes
- * <li>delete <code>Modifier</code> nodes, add <em>MODIFIERS</em> property to
- * <code>TypeDeclaration</code>, <code>FieldDeclaration</code>,
+ * <li>delete <code>Modifier</code> nodes, and add <em>MODIFIERS</em> property
+ * to <code>TypeDeclaration</code>, <code>FieldDeclaration</code>,
  * <code>MethodDeclaration</code>, <code>SingleVariableDeclaration</code> node,
- * which is of <code>int</code> type
+ * which is of <code>String[]</code> type
  * <li>add <em>NAME</em> property for <code>PackageDeclaration</code>,
  * <code>TypeDeclaration</code> and <code>MethodDeclaration</code> node, and
  * delete its <em>NAME</em> child
@@ -321,7 +323,7 @@ public class StoreVisitor extends ASTVisitor {
 
 	@Override
 	public void endVisit(FieldDeclaration node) {
-		graph.setProperty(node, "MODIFIERS", node.getModifiers());
+		graph.setProperty(node, "MODIFIERS", getModifiers(node.modifiers()));
 
 		graph.addRelationship(node, node.getType(), RelName.TYPE);
 		graph.addRelationships(node, node.fragments(), RelName.FRAGMENTS);
@@ -410,7 +412,7 @@ public class StoreVisitor extends ASTVisitor {
 	@Override
 	public void endVisit(MethodDeclaration node) {
 		graph.setProperty(node, "CONSTRUCTOR", node.isConstructor());
-		graph.setProperty(node, "MODIFIERS", node.getModifiers());
+		graph.setProperty(node, "MODIFIERS", getModifiers(node.modifiers()));
 
 		graph.setProperty(node, "NAME", node.getName().getIdentifier());
 		graph.deleteNode(node.getName());
@@ -537,7 +539,7 @@ public class StoreVisitor extends ASTVisitor {
 	@Override
 	public void endVisit(SingleVariableDeclaration node) {
 		graph.setProperty(node, "VARARGS", node.isVarargs());
-		graph.setProperty(node, "MODIFIERS", node.getModifiers());
+		graph.setProperty(node, "MODIFIERS", getModifiers(node.modifiers()));
 
 		graph.addRelationship(node, node.getType(), RelName.TYPE);
 		graph.addRelationship(node, node.getName(), RelName.NAME);
@@ -612,7 +614,7 @@ public class StoreVisitor extends ASTVisitor {
 	@Override
 	public void endVisit(TypeDeclaration node) {
 		graph.setProperty(node, "INTERFACE", node.isInterface());
-		graph.setProperty(node, "MODIFIERS", node.getModifiers());
+		graph.setProperty(node, "MODIFIERS", getModifiers(node.modifiers()));
 
 		graph.setProperty(node, "NAME", node.getName().getIdentifier());
 		graph.deleteNode(node.getName());
@@ -676,6 +678,16 @@ public class StoreVisitor extends ASTVisitor {
 	@Override
 	public void endVisit(WildcardType node) {
 
+	}
+
+	@SuppressWarnings("rawtypes")
+	private static String[] getModifiers(List modifiers) {
+		String[] results = new String[modifiers.size()];
+		for (int i = 0; i < modifiers.size(); i++) {
+			Modifier modifier = (Modifier) modifiers.get(i);
+			results[i] = modifier.getKeyword().toString();
+		}
+		return results;
 	}
 
 }
