@@ -14,13 +14,13 @@ public class Option {
 	public static String PROJECT_DIR = null;
 	
 	/**
-	 * read from config file and set all its fields
-	 * @param filename config file name
-	 * @throws IOException if config file cannot be opened
+	 * read from setting file and set all its fields
+	 * @param filename setting file name
+	 * @throws IOException if setting file cannot be opened
 	 */
-	public static void readOptions(String filename) throws IOException {
+	public static void readSettings(String filename) throws IOException {
 		
-		// read config info from file
+		// read setting info from file
 		BufferedReader in = new BufferedReader(new FileReader(filename));
 		while (true) {
 			String line = in.readLine();
@@ -29,7 +29,7 @@ public class Option {
 			}
 			String[] fields = line.split("=", 2);
 			if (fields.length < 2) {
-				logger.warn("Illegal line in config file: " + line);
+				logger.warn("Illegal line in setting file: " + line);
 				continue;
 			}
 			String name = fields[0].trim();
@@ -39,7 +39,7 @@ public class Option {
 			} else if (name.equals("project.directory")) {
 				PROJECT_DIR = value;
 			} else {
-				logger.warn("Illegal line in config file: " + line);
+				logger.warn("Illegal line in setting file: " + line);
 			}
 		}
 		in.close();

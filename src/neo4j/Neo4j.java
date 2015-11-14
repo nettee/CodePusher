@@ -8,14 +8,14 @@ import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
 public class Neo4j {
-	
+
 	private static Logger logger = Logger.getLogger(Neo4j.class);
-	
+
 	private final GraphDatabaseService db;
 
 	public static final int WRITE = 0;
 	public static final int APPEND = 1;
-	
+
 	/**
 	 * open embedded database server under the path <code>dir</code>, in the
 	 * mode of <code>mode</code>
@@ -27,7 +27,8 @@ public class Neo4j {
 	 * @param dir
 	 *            the database directory path
 	 * @param mode
-	 *            database opening mode (<code>WRITE</code> / <code>APPEND</code>)
+	 *            database opening mode (<code>WRITE</code> /
+	 *            <code>APPEND</code>)
 	 * @return <code>Neo4j</code> class instance
 	 */
 	public static Neo4j open(String dir, int mode) {
@@ -42,7 +43,7 @@ public class Neo4j {
 	private Neo4j(GraphDatabaseService db) {
 		this.db = db;
 	}
-	
+
 	private static boolean deleteDirectory(File dir) {
 		if (dir.isDirectory()) {
 			for (String child : dir.list()) {
@@ -69,7 +70,7 @@ public class Neo4j {
 			tx.success();
 		}
 	}
-	
+
 	/**
 	 * close the opened database
 	 */
