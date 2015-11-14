@@ -24,6 +24,7 @@ public class StoreWorker implements Worker {
 		}
 
 		graph.connectTrees();
+//		graph.connectTypeRelationships();
 
 		logger.info("Work finished");
 	}

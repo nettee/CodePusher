@@ -13,9 +13,10 @@ import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -43,13 +44,16 @@ public class Graph {
 	private static final Logger logger = Logger.getLogger(Graph.class);
 
 	private final GraphDatabaseService db;
+//	private final ExecutionEngine engine;
+	private final BindingNodeCreator bindingNodeCreator;
 
 	private Map<ASTNode, Node> map = new HashMap<>();
-
 	private List<Node> treeRoots = new ArrayList<>();
 
 	public Graph(GraphDatabaseService db) {
 		this.db = db;
+//		this.engine = new ExecutionEngine(db);
+		this.bindingNodeCreator = new BindingNodeCreator(db);
 	}
 
 	public void storeTree(Tree tree) {
@@ -71,6 +75,13 @@ public class Graph {
 		}
 		logger.info(String.format("Connect trees to node Project(%s)", projectName));
 	}
+
+//	public void connectTypeRelationships() {
+//		String query = "match (td1:TypeDeclaration)-[:AST {NAME:\"SUPERCLASS_TYPE\"}]->"
+//				+ "(:SimpleType)-->(:Binding)<--(td2:TypeDeclaration)"
+//				+ "create (td1)-[:TYPE {NAME:\"EXTENDS\"}]->(td2)";
+//		engine.execute(query);
+//	}
 
 	/**
 	 * create a node and add labels according to the giving ASTNode
@@ -114,44 +125,21 @@ public class Graph {
 
 		// add type binding
 		if (astNode instanceof TypeDeclaration) {
-			createBindingNode(node, ((TypeDeclaration) astNode).resolveBinding());
+			bindingNodeCreator.getBindingNode(node, ((TypeDeclaration) astNode).resolveBinding());
+		}
+		if (astNode instanceof SimpleType) {
+			ITypeBinding binding = ((SimpleType) astNode).resolveBinding();
+			if (!binding.isPrimitive() && !binding.getName().equals("String")) {
+				bindingNodeCreator.getBindingNode(node, binding);
+			}
 		}
 
 		// add method binding
 		if (astNode instanceof MethodDeclaration) {
-			createBindingNode(node, ((MethodDeclaration) astNode).resolveBinding());
+			bindingNodeCreator.getBindingNode(node, ((MethodDeclaration) astNode).resolveBinding());
 		}
 
 		map.put(astNode, node);
-
-		return node;
-	}
-
-	private Node createBindingNode(Node node0, IBinding binding) {
-		if (node0 == null) {
-			throw new IllegalArgumentException();
-		}
-
-		Node node = db.createNode();
-		node.addLabel(NodeLabel.Binding);
-
-		switch (binding.getKind()) {
-		case IBinding.TYPE:
-			node.addLabel(NodeLabel.TypeBinding);
-			break;
-		case IBinding.METHOD:
-			node.addLabel(NodeLabel.MethodBinding);
-			break;
-		case IBinding.VARIABLE:
-			node.addLabel(NodeLabel.VariableBinding);
-			break;
-		default:
-			throw new AssertionError();
-		}
-
-		node.setProperty("KEY", binding.getKey());
-		node.setProperty("NAME", binding.getName());
-		node0.createRelationshipTo(node, RelType.BINDING);
 
 		return node;
 	}

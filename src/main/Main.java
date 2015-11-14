@@ -16,7 +16,7 @@ public class Main {
 		PropertyConfigurator.configure("log4j.properties");
 		
 		try {
-			Option.readOptions("./config.ini");
+			Option.readSettings("./config.ini");
 		} catch (IOException e) {
 			logger.error("Fail to get global configuration.");
 			return;
