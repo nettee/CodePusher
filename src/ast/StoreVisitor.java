@@ -324,6 +324,10 @@ public class StoreVisitor extends ASTVisitor {
 	@Override
 	public void endVisit(FieldDeclaration node) {
 		graph.setProperty(node, "MODIFIERS", getModifiers(node.modifiers()));
+		
+		// XXX
+		VariableDeclarationFragment fragment = (VariableDeclarationFragment) node.fragments().get(0);
+		graph.setProperty(node, "NAME", fragment.getName().getIdentifier());
 
 		graph.addRelationship(node, node.getType(), RelName.TYPE);
 		graph.addRelationships(node, node.fragments(), RelName.FRAGMENTS);

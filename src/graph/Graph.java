@@ -49,7 +49,8 @@ public class Graph {
 
 	private Map<ASTNode, Node> map = new HashMap<>();
 	private List<Node> treeRoots = new ArrayList<>();
-
+	private List<Node> classNodes = new ArrayList<>();
+	
 	public Graph(GraphDatabaseService db) {
 		this.db = db;
 //		this.engine = new ExecutionEngine(db);
@@ -70,10 +71,19 @@ public class Graph {
 		Node project = db.createNode(NodeLabel.Project);
 		String projectName = Option.PROJECT_DIR.substring(Option.PROJECT_DIR.lastIndexOf(File.separator) + 1);
 		project.setProperty("NAME", projectName);
-		for (Node treeRoot : treeRoots) {
-			project.createRelationshipTo(treeRoot, RelType.CONN);
+		project.setProperty("OUTNAME", "Project");
+		
+		
+//		for (Node treeRoot : treeRoots) {
+//			project.createRelationshipTo(treeRoot, RelType.CONN);
+//		}
+//		logger.info(String.format("Connect trees to node Project(%s)", projectName));
+		
+		for (Node classNode : classNodes) {
+			project.createRelationshipTo(classNode, RelType.CLASSES);
 		}
-		logger.info(String.format("Connect trees to node Project(%s)", projectName));
+		logger.info(String.format("Connect class nodes to node Project(%s)", projectName));
+	
 	}
 
 //	public void connectTypeRelationships() {
@@ -130,6 +140,10 @@ public class Graph {
 		}
 		if (astNode instanceof VariableDeclaration) {
 			node.addLabel(NodeLabel.VariableDeclaration);
+		}
+		
+		if (astNode instanceof TypeDeclaration) {
+			classNodes.add(node);
 		}
 
 		// add type binding
