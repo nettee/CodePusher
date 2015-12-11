@@ -92,6 +92,15 @@ public class Graph {
 
 		// add raw label
 		String name = astNode.getClass().getSimpleName();
+		if (name.equals("TypeDeclaration")) {
+			name = "Class";
+		}
+		if (name.equals("MethodDeclaration")) {
+			name = "Method";
+		}
+		if (name.equals("FieldDeclaration")) {
+			name = "Field";
+		}
 		node.addLabel(DynamicLabel.label(name));
 
 		// add general label
